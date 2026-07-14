@@ -1,0 +1,12 @@
+{
+  "_comment": "Maps the standard schema (left) to candidate Fresh export headers (right). Matching is case-insensitive and whitespace-tolerant. First header found wins. Add aliases here when a new Fresh export uses different names — no code change needed.",
+  "ticket_id":             ["Ticket ID", "Case Number", "CASE NUMBER", "Ticket Id", "ID"],
+  "subject":               ["Subject", "SUBCASE TITLE", "Summary"],
+  "created_time":          ["Created time", "Created Time", "Created", "Created date"],
+  "group":                 ["Group", "Team"],
+  "agent":                 ["Agent"],
+  "email":                 ["Contact ID", "EMAIL ADDRESS", "Email", "Requester Email"],
+  "first_response_status": ["First response status", "First Response Status"],
+  "resolution_status":     ["Resolution status", "Resolution Status"],
+  "every_response_status": ["Every response status", "Every Response Status"]
+}

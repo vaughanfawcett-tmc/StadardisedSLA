@@ -1,0 +1,8 @@
+{
+  "_comment": "Configurable SLA logic (baseline rule mirrors the current manual reporting process). A ticket is OUTSIDE SLA if ANY of the listed status fields equals one of 'violation_values'. Blank / missing = not applicable = does not count as a breach. To change the rule, edit here — no code change needed.",
+  "status_fields": ["first_response_status", "resolution_status", "every_response_status"],
+  "violation_values": ["SLA Violated"],
+  "within_values": ["Within SLA"],
+  "within_label": "Within SLA",
+  "outside_label": "Outside SLA"
+}

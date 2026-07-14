@@ -1,0 +1,23 @@
+{
+  "_comment": "The single source of truth for the standardised SLA. One entry per app. The 'id' is the value you pass to analytics (analytics.APP = ...) AND the prefix of the uptime monitor name. Keep ids kebab-case and identical everywhere. platform = where it's hosted (render); type = how it's built (python/Streamlit -> use analytics.py).",
+  "apps": [
+    {
+      "id": "mileage-variance",
+      "url": "https://mileagevarience.onrender.com",
+      "platform": "render",
+      "type": "python"
+    },
+    {
+      "id": "mileage-variance-elia",
+      "url": "https://mileagevarience-elia.onrender.com",
+      "platform": "render",
+      "type": "python"
+    },
+    {
+      "id": "hsbc-sla-tool",
+      "url": "https://hsbc-sla-tool.onrender.com",
+      "platform": "render",
+      "type": "python"
+    }
+  ]
+}
