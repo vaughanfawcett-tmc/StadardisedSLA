@@ -1,0 +1,6 @@
+name,url,check_frequency,expected_status
+mileage-variance — prod,https://mileagevarience.onrender.com,180,200
+mileage-variance-elia — prod,https://mileagevarience-elia.onrender.com,180,200
+hsbc-sla-tool — prod,https://hsbc-sla-tool.onrender.com,180,200
+astrazeneca-sla — prod,https://astrazenecasla.onrender.com,180,200
+standardised-sla — prod,https://standardised-sla.onrender.com,180,200

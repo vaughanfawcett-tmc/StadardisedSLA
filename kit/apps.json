@@ -18,6 +18,18 @@
       "url": "https://hsbc-sla-tool.onrender.com",
       "platform": "render",
       "type": "python"
+    },
+    {
+      "id": "astrazeneca-sla",
+      "url": "https://astrazenecasla.onrender.com",
+      "platform": "render",
+      "type": "python"
+    },
+    {
+      "id": "standardised-sla",
+      "url": "https://standardised-sla.onrender.com",
+      "platform": "render",
+      "type": "python"
     }
   ]
 }

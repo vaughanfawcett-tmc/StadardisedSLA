@@ -5,4 +5,5 @@ __pycache__/
 *.csv
 *.xlsx
 !config/*.json
+!kit/monitors.csv
 .streamlit/secrets.toml
