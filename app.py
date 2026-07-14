@@ -12,6 +12,7 @@ import pandas as pd
 import streamlit as st
 
 import analytics
+import ui_theme
 from sla_core import (
     ALL, IngestError, by_company, by_month, kpi, list_companies,
     list_months, load_standardised,
@@ -23,8 +24,10 @@ st.set_page_config(page_title="Standardised SLA Reporting", page_icon="📊", la
 analytics.APP = "standardised-sla"
 analytics.page_open()
 
-st.title("📊 Standardised SLA Reporting")
-st.caption("Phase 1 — upload a Fresh SLA export, then filter by company and month.")
+ui_theme.inject_css()
+st.markdown('<div class="app-title">Standardised SLA</div>', unsafe_allow_html=True)
+st.markdown('<div class="app-sub">Upload a Fresh SLA export, then filter by company and month.</div>',
+            unsafe_allow_html=True)
 
 
 @st.cache_data(show_spinner="Processing export…")
@@ -68,14 +71,8 @@ if st.session_state.get("_tracked_file") != upload.name:
 # ── 3. KPI output ────────────────────────────────────────────────────────────
 result = kpi(df, company, month)
 
-st.subheader(f"SLA result · {result['company']} · {result['month']}")
-c1, c2, c3, c4 = st.columns(4)
-c1.metric("SLA % Score", f"{result['sla_percentage']:.2f}%")
-c2.metric("Total Tickets", f"{result['total_tickets']:,}")
-c3.metric("Within SLA", f"{result['within_sla']:,}")
-c4.metric("Outside SLA", f"{result['outside_sla']:,}",
-          delta=None if result["outside_sla"] == 0 else f"-{result['outside_sla']}",
-          delta_color="inverse")
+ui_theme.kpi_hero(result)
+st.write("")
 
 with st.expander("KPI output (JSON — the Phase 1 API contract)"):
     st.code(json.dumps(result, indent=2), language="json")
@@ -86,13 +83,16 @@ st.divider()
 left, right = st.columns(2)
 
 with left:
-    st.markdown(f"**SLA by company** {'· ' + month if month != ALL else '· all months'}")
+    scope = month if month != ALL else "all months"
+    st.markdown(f'<div class="section-label">SLA by company · {scope}</div>',
+                unsafe_allow_html=True)
     st.dataframe(by_company(df, month=None if month == ALL else month),
                  hide_index=True, use_container_width=True)
 
 with right:
     label = "all companies" if company == ALL else company
-    st.markdown(f"**SLA by month** · {label}")
+    st.markdown(f'<div class="section-label">SLA by month · {label}</div>',
+                unsafe_allow_html=True)
     trend = by_month(df, company=None if company == ALL else company)
     st.dataframe(trend, hide_index=True, use_container_width=True)
     if len(trend) > 1:
