@@ -44,11 +44,16 @@ def _pid() -> str:
 
 
 def track(event: str, **props) -> None:
-    """Track a usage event, stamped with app + platform like every other app."""
+    """Track a usage event, stamped with app + platform like every other app.
+
+    posthog>=7 signature: capture(event, distinct_id=..., properties=...).
+    (Earlier positional form silently failed — the client swallows the error.)
+    """
     client = _client()
     if client is None:
         return
-    client.capture(_pid(), event, {"app": APP, "platform": "streamlit", **props})
+    client.capture(event, distinct_id=_pid(),
+                   properties={"app": APP, "platform": "streamlit", **props})
 
 
 def page_open() -> None:
