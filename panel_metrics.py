@@ -22,8 +22,9 @@ PH_PROJECT = os.environ.get("POSTHOG_PROJECT_ID", "225035")
 PH_HOST = os.environ.get("POSTHOG_HOST", "https://eu.posthog.com")
 BS_BASE = "https://uptime.betterstack.com/api/v2"
 
-# Categorical hues (validated: worst adjacent CVD ΔE 30.6). Assigned by identity, fixed order.
-APP_HUES = ["#0071E3", "#FF9500", "#30B0C7", "#AF52DE", "#34C759"]
+# Categorical hues, validated for the DARK surface (worst adjacent CVD ΔE 28.2).
+# Assigned by identity, fixed order.
+APP_HUES = ["#0A84FF", "#C06E00", "#0E9DBC", "#BF5AF2", "#1F9C3C"]
 
 
 def _hue(name: str, order: list[str]) -> str:
@@ -101,17 +102,17 @@ def _trend_chart(trend: pd.DataFrame, order: list[str]):
                                                    domainColor=ui_theme.HAIRLINE, tickColor=ui_theme.HAIRLINE, grid=False)),
         y=alt.Y("events:Q", title="events / day",
                 axis=alt.Axis(labelColor=ui_theme.SUBTLE, titleColor=ui_theme.SUBTLE,
-                              gridColor="#EEEEF0", domainOpacity=0, tickOpacity=0)),
+                              gridColor=ui_theme.HAIRLINE, gridOpacity=0.5, domainOpacity=0, tickOpacity=0)),
         color=alt.Color("app:N", scale=alt.Scale(domain=domain, range=rng),
                         legend=alt.Legend(title=None, orient="top", labelColor=ui_theme.INK)),
         tooltip=[alt.Tooltip("day:T", title="Day"), alt.Tooltip("app:N", title="App"),
                  alt.Tooltip("events:Q", title="Events")],
     )
-    area = base.mark_area(opacity=0.12, interpolate="monotone")
+    area = base.mark_area(opacity=0.14, interpolate="monotone")
     line = base.mark_line(strokeWidth=2.5, interpolate="monotone",
-                          point=alt.OverlayMarkDef(size=42, filled=True))
-    return (area + line).properties(height=280).configure_view(strokeOpacity=0).configure_axis(
-        labelFont="-apple-system", titleFont="-apple-system")
+                          point=alt.OverlayMarkDef(size=48, filled=True))
+    return (area + line).properties(height=280, background="transparent").configure_view(
+        strokeOpacity=0).configure_axis(labelFont="-apple-system", titleFont="-apple-system")
 
 
 # ── main ─────────────────────────────────────────────────────────────────────
