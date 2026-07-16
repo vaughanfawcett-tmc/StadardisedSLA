@@ -33,6 +33,17 @@ def test_sla_engine_rule():
         "Within SLA", "Within SLA", "Outside SLA", "Outside SLA"]
 
 
+def test_iso_and_dayfirst_dates_both_parse():
+    """Freshdesk ISO (YYYY-MM-DD) and cleaned DD/MM/YYYY must both map to the
+    correct month — ISO must NOT be day-first parsed (regression guard)."""
+    from sla_core.ingest import _parse_datetimes
+    iso = _parse_datetimes(pd.Series(["2026-05-13 05:30:36", "2026-05-01 02:09:49"]))
+    assert iso.dt.strftime("%Y-%m").tolist() == ["2026-05", "2026-05"]  # not 2026-01 / dropped
+    dayfirst = _parse_datetimes(pd.Series(["13/05/2026 05:30", "01/05/2026 02:09"]))
+    assert dayfirst.dt.strftime("%Y-%m").tolist() == ["2026-05", "2026-05"]
+    assert _parse_datetimes(pd.Series([""])).isna().all()  # blank -> NaT, no crash
+
+
 def test_ingest_real_export():
     res = load_standardised(EXPORT.read_bytes(), EXPORT.name)
     assert res.row_count == 6941
@@ -61,5 +72,6 @@ def test_ingest_real_export():
 if __name__ == "__main__":
     test_company_mapping()
     test_sla_engine_rule()
+    test_iso_and_dayfirst_dates_both_parse()
     test_ingest_real_export()
     print("All tests passed.")

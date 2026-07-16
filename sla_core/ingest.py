@@ -38,6 +38,24 @@ class IngestResult:
     warnings: list = field(default_factory=list)
 
 
+def _parse_datetimes(series: pd.Series) -> pd.Series:
+    """Parse Created-time values robustly across Fresh export formats.
+
+    Freshdesk's native export is ISO ``YYYY-MM-DD HH:MM:SS``; some cleaned
+    exports use ``DD/MM/YYYY HH:MM``. Parsing ISO with ``dayfirst=True`` would
+    silently mis-assign the month (and drop day>12), so we try ISO first and
+    only fall back to day-first parsing for values ISO couldn't handle.
+    """
+    s = series.astype(str).str.strip()
+    iso = pd.to_datetime(s, errors="coerce", format="ISO8601")
+    todo = iso.isna() & (s != "")
+    if todo.any():
+        fallback = pd.to_datetime(s[todo], errors="coerce", dayfirst=True)
+        iso = iso.copy()
+        iso[todo] = fallback
+    return iso
+
+
 def _read_raw(data: bytes, filename: str) -> pd.DataFrame:
     name = (filename or "").lower()
     if name.endswith((".xlsx", ".xls")):
@@ -85,7 +103,7 @@ def load_standardised(data: bytes, filename: str) -> IngestResult:
         df[std] = raw[resolved[std]].astype(str).str.strip() if std in resolved else ""
 
     # Derived: created_date, reporting_month.
-    created = pd.to_datetime(df["created_time"], errors="coerce", dayfirst=True)
+    created = _parse_datetimes(df["created_time"])
     df["created_date"] = created.dt.date
     df["reporting_month"] = created.dt.strftime("%Y-%m")
 
