@@ -82,6 +82,36 @@ def stylesheet() -> str:
 
           .section-label {{ color: {INK}; font-weight: 600; font-size: 1.05rem;
                             letter-spacing: -0.01em; margin: 6px 0 10px; }}
+          .eyebrow {{ color: {SUBTLE}; font-size: .72rem; font-weight: 700;
+                      text-transform: uppercase; letter-spacing: .1em; margin: 26px 0 12px; }}
+
+          /* Overview KPI strip */
+          .kpi {{ background: {CARD}; border-radius: 18px; padding: 18px 20px;
+                  box-shadow: 0 1px 2px rgba(0,0,0,.05), 0 8px 24px rgba(0,0,0,.04);
+                  border: 1px solid rgba(0,0,0,.03); position: relative; overflow: hidden; }}
+          .kpi::before {{ content:""; position:absolute; left:0; top:0; bottom:0; width:4px;
+                          background: var(--accent, {BLUE}); }}
+          .kpi .k-label {{ color: {SUBTLE}; font-size: .78rem; font-weight: 600;
+                           text-transform: uppercase; letter-spacing: .06em; }}
+          .kpi .k-value {{ color: {INK}; font-size: 2rem; font-weight: 650; letter-spacing: -.02em;
+                           font-variant-numeric: tabular-nums; line-height: 1.05; margin-top: 8px; }}
+          .kpi .k-foot {{ color: {SUBTLE}; font-size: .8rem; margin-top: 4px; }}
+
+          /* Uptime/usage tile with a health bar */
+          .mtile {{ background: {CARD}; border-radius: 18px; padding: 18px 20px;
+                    box-shadow: 0 1px 2px rgba(0,0,0,.05), 0 8px 24px rgba(0,0,0,.04);
+                    border: 1px solid rgba(0,0,0,.03); }}
+          .mtile .m-name {{ font-weight: 600; color: {INK}; font-size: .95rem; display:flex;
+                            align-items:center; gap:7px; }}
+          .mtile .m-big {{ font-size: 1.85rem; font-weight: 650; color: {INK}; letter-spacing:-.02em;
+                           font-variant-numeric: tabular-nums; margin-top: 8px; }}
+          .mtile .m-sub {{ color: {SUBTLE}; font-size: .8rem; margin-top: 2px; }}
+          .mtile .m-bar {{ height: 5px; border-radius: 999px; background: #ECECEE; margin-top: 12px;
+                           overflow: hidden; }}
+          .mtile .m-bar > span {{ display:block; height:100%; border-radius:999px; }}
+          .dot {{ width:8px; height:8px; border-radius:50%; display:inline-block; }}
+          [data-testid="stMetric"] {{ background:{CARD}; border-radius:18px; padding:16px 18px;
+                                      box-shadow:0 1px 2px rgba(0,0,0,.05),0 8px 24px rgba(0,0,0,.04); }}
         </style>
         """
 
