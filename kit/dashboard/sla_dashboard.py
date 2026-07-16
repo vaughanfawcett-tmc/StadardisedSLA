@@ -22,7 +22,7 @@ import streamlit as st
 # --------------------------------------------------------------------------- config
 BS_TOKEN = os.environ.get("BETTERSTACK_API_TOKEN", "")
 PH_KEY = os.environ.get("POSTHOG_PERSONAL_API_KEY", "")
-PH_PROJECT = os.environ.get("POSTHOG_PROJECT_ID", "217283")
+PH_PROJECT = os.environ.get("POSTHOG_PROJECT_ID", "225035")
 PH_HOST = os.environ.get("POSTHOG_HOST", "https://eu.posthog.com")
 
 BS_BASE = "https://uptime.betterstack.com/api/v2"

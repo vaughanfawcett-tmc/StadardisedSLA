@@ -25,8 +25,8 @@ This rewrites `kit/monitors.csv` and prints the exact analytics line for each ap
 
 ## Step 2 — ✅ PostHog project (connected)
 - Region: **EU Cloud** → `api_host` = `https://eu.i.posthog.com`
-- Project ID: **217283**
-- Project token (write-only client key, safe in public apps): `phc_sKVZdGbRuAsYc3syaFWWd7rV9K7GezJrYJFdi8mg4Mbe`
+- Project ID: **225035**
+- Project token (write-only client key, safe in public apps): `phc_snvmegJQwrSSGtDNjQjjopUbbfuzhb4MnZuacx8F2hBb`
 - Already baked into `kit/analytics.js`, `kit/analytics.py`, `kit/snippet.html`.
 
 ## Step 3 — ✅ Instrument each app (paste the kit)
