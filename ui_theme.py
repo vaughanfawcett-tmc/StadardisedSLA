@@ -23,6 +23,9 @@ RED = "#FF453A"        # status critical
 
 FONT = ('-apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", '
         '"Helvetica Neue", Helvetica, Arial, sans-serif')
+# Instrument-panel micro-labels (eyebrows, KPI labels) use the system mono.
+MONO = ('ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, '
+        '"Liberation Mono", monospace')
 
 
 def health_color(pct: float) -> str:
@@ -36,6 +39,7 @@ def health_color(pct: float) -> str:
 def stylesheet() -> str:
     return f"""
         <style>
+          html {{ color-scheme: dark; }}
           html, body, [class*="css"] {{ font-family: {FONT}; }}
           .stApp {{
             background:
@@ -46,6 +50,12 @@ def stylesheet() -> str:
           }}
           #MainMenu, header[data-testid="stHeader"], footer {{ visibility: hidden; }}
           .block-container {{ padding-top: 2.2rem; padding-bottom: 3rem; max-width: 1180px; }}
+
+          ::-webkit-scrollbar {{ width: 10px; height: 10px; }}
+          ::-webkit-scrollbar-track {{ background: transparent; }}
+          ::-webkit-scrollbar-thumb {{ background: #2A3644; border-radius: 999px;
+                                       border: 2px solid {CANVAS}; }}
+          ::-webkit-scrollbar-thumb:hover {{ background: #364456; }}
 
           section[data-testid="stSidebar"] {{
             background: rgba(14,19,26,0.7);
@@ -58,9 +68,14 @@ def stylesheet() -> str:
                         color: {INK}; margin: 0 0 .1rem 0; }}
           .app-sub {{ color: {SUBTLE}; font-size: 1.02rem; margin-bottom: 1.4rem; }}
           p, span, label, .stMarkdown {{ color: {INK}; }}
+          [data-testid="stCaptionContainer"] p {{ color: {SUBTLE}; }}
+          hr {{ border-color: {HAIRLINE}; }}
 
-          .eyebrow {{ color: {SUBTLE}; font-size: .72rem; font-weight: 700;
-                      text-transform: uppercase; letter-spacing: .12em; margin: 28px 0 12px; }}
+          .eyebrow {{ color: {SUBTLE}; font-family: {MONO}; font-size: .68rem; font-weight: 600;
+                      text-transform: uppercase; letter-spacing: .16em; margin: 30px 0 12px;
+                      display: flex; align-items: center; gap: 10px; }}
+          .eyebrow::after {{ content: ""; flex: 1; height: 1px;
+                             background: linear-gradient(90deg, {HAIRLINE}, transparent); }}
           .section-label {{ color: {INK}; font-weight: 600; font-size: 1.05rem;
                             letter-spacing: -0.01em; margin: 6px 0 10px; }}
 
@@ -71,19 +86,23 @@ def stylesheet() -> str:
           /* KPI overview strip */
           .kpi {{ background: {CARD}; border-radius: 18px; padding: 18px 20px;
                   border: 1px solid {HAIRLINE}; position: relative; overflow: hidden;
-                  box-shadow: 0 14px 34px rgba(0,0,0,.45); }}
+                  box-shadow: 0 14px 34px rgba(0,0,0,.45);
+                  transition: transform .25s ease, border-color .25s ease; }}
+          .kpi:hover {{ transform: translateY(-2px); border-color: #33445C; }}
           .kpi::before {{ content:""; position:absolute; left:0; top:0; bottom:0; width:3px;
                           background: var(--accent, {BLUE});
                           box-shadow: 0 0 16px 1px var(--accent, {BLUE}); }}
-          .kpi .k-label {{ color: {SUBTLE}; font-size: .72rem; font-weight: 700;
-                           text-transform: uppercase; letter-spacing: .08em; }}
+          .kpi .k-label {{ color: {SUBTLE}; font-family: {MONO}; font-size: .68rem; font-weight: 600;
+                           text-transform: uppercase; letter-spacing: .12em; }}
           .kpi .k-value {{ color: {INK}; font-size: 2rem; font-weight: 650; letter-spacing: -.02em;
                            font-variant-numeric: tabular-nums; line-height: 1.05; margin-top: 8px; }}
           .kpi .k-foot {{ color: {SUBTLE}; font-size: .8rem; margin-top: 4px; }}
 
           /* metric tile with health bar */
           .mtile {{ background: {CARD}; border-radius: 18px; padding: 18px 20px;
-                    border: 1px solid {HAIRLINE}; box-shadow: 0 14px 34px rgba(0,0,0,.45); }}
+                    border: 1px solid {HAIRLINE}; box-shadow: 0 14px 34px rgba(0,0,0,.45);
+                    transition: transform .25s ease, border-color .25s ease; }}
+          .mtile:hover {{ transform: translateY(-2px); border-color: #33445C; }}
           .mtile .m-name {{ font-weight: 600; color: {INK}; font-size: .95rem; display:flex;
                             align-items:center; gap:8px; }}
           .mtile .m-big {{ font-size: 1.85rem; font-weight: 650; color: {INK}; letter-spacing:-.02em;
@@ -96,22 +115,92 @@ def stylesheet() -> str:
 
           /* KPI hero (upload tab) */
           .hero {{ display: flex; align-items: center; gap: 40px; flex-wrap: wrap; }}
-          .hero .context {{ color: {SUBTLE}; font-size: .82rem; font-weight: 700;
-                            text-transform: uppercase; letter-spacing: .1em; margin-bottom: 14px; }}
+          .hero .context {{ color: {SUBTLE}; font-family: {MONO}; font-size: .74rem; font-weight: 600;
+                            text-transform: uppercase; letter-spacing: .14em; margin-bottom: 14px; }}
           .stats {{ display: flex; gap: 40px; flex-wrap: wrap; }}
           .stat .num {{ font-size: 2.1rem; font-weight: 600; color: {INK}; letter-spacing: -0.02em;
                         line-height: 1; font-variant-numeric: tabular-nums; }}
           .stat .lbl {{ color: {SUBTLE}; font-size: .9rem; margin-top: 6px; }}
 
-          /* Streamlit widgets on dark */
+          /* Tabs → segmented control (react-aria DOM, Streamlit ≥1.5x) */
+          .stTabs [role="tablist"] {{
+            gap: 4px; background: {CARD}; border: 1px solid {HAIRLINE};
+            border-radius: 999px; padding: 4px; width: max-content; }}
+          .stTabs [data-testid="stTab"] {{
+            color: {SUBTLE}; border-radius: 999px; padding: 6px 18px;
+            border-bottom: none; box-shadow: none;
+            transition: color .2s ease, background .2s ease; }}
+          .stTabs [data-testid="stTab"]::after {{ display: none; }}
+          .stTabs [data-testid="stTab"]:hover {{ color: {INK}; background: transparent; }}
+          .stTabs [data-testid="stTab"][aria-selected="true"] {{
+            color: {INK}; background: {CARD_HI};
+            box-shadow: 0 2px 10px rgba(0,0,0,.45), 0 1px 0 rgba(255,255,255,.04) inset; }}
+          .stTabs [data-testid="stTab"] p {{ font-size: .92rem; font-weight: 600; }}
+          .stTabs [class*="SelectionIndicator"] {{ display: none; }}
+
+          /* Horizontal radio → pill toggle */
+          [data-testid="stRadio"] [role="radiogroup"] {{ gap: 6px; }}
+          [data-testid="stRadio"] [role="radiogroup"] label {{
+            background: {CARD}; border: 1px solid {HAIRLINE}; border-radius: 999px;
+            padding: 5px 16px; margin: 0; cursor: pointer;
+            transition: border-color .2s ease, background .2s ease; }}
+          [data-testid="stRadio"] [role="radiogroup"] label:hover {{ border-color: #33445C; }}
+          [data-testid="stRadio"] [role="radiogroup"] label > span:first-child {{
+            position: absolute; width: 1px; height: 1px; overflow: hidden;
+            clip: rect(0 0 0 0); white-space: nowrap; }}
+          /* the visual radio circle lives beside the text, three divs deep */
+          [data-testid="stRadio"] [role="radiogroup"] label > div > div > div:first-child {{
+            display: none; }}
+          [data-testid="stRadio"] [role="radiogroup"] label:has(input:checked) {{
+            background: rgba(10,132,255,.14); border-color: rgba(10,132,255,.55); }}
+          [data-testid="stRadio"] [role="radiogroup"] label:has(input:checked) p {{
+            color: {BLUE}; font-weight: 600; }}
+
+          /* File uploader dropzone */
+          [data-testid="stFileUploaderDropzone"] {{
+            background: {CARD}; border: 1.5px dashed #33445C; border-radius: 16px;
+            transition: border-color .2s ease, background .2s ease; }}
+          [data-testid="stFileUploaderDropzone"]:hover {{
+            border-color: {BLUE}; background: {CARD_HI}; }}
+          [data-testid="stFileUploaderDropzone"] button {{
+            border-radius: 980px; border: 1px solid {HAIRLINE};
+            background: {CARD_HI}; color: {INK}; font-weight: 600; }}
+
+          /* Expanders as cards */
+          [data-testid="stExpander"] {{
+            background: {CARD}; border: 1px solid {HAIRLINE}; border-radius: 16px;
+            overflow: hidden; }}
+          [data-testid="stExpander"] details {{ border: none; background: transparent; }}
+          [data-testid="stExpander"] summary {{ padding: 14px 18px; }}
+          [data-testid="stExpander"] summary:hover {{ color: {BLUE}; }}
+          [data-testid="stExpander"] summary p {{ font-weight: 600; }}
+
+          /* Alerts (info/success/warning) */
+          [data-testid="stAlertContainer"] {{
+            background: {CARD}; border: 1px solid {HAIRLINE}; border-radius: 14px;
+            color: {INK}; }}
+
+          /* Selects */
+          [data-baseweb="select"] > div {{
+            background: {CARD_HI}; border-color: {HAIRLINE}; border-radius: 12px; }}
+          [data-baseweb="popover"] [role="listbox"] {{
+            background: {CARD_HI}; border: 1px solid {HAIRLINE}; border-radius: 12px; }}
+
+          /* Tables, buttons */
           [data-testid="stDataFrame"] {{ border-radius: 14px; overflow: hidden; border: 1px solid {HAIRLINE}; }}
           .stDownloadButton button, .stButton button {{
             border-radius: 980px; border: 1px solid {HAIRLINE};
-            background: {CARD_HI}; color: {INK}; font-weight: 600; padding: .5rem 1.1rem; }}
-          .stDownloadButton button:hover, .stButton button:hover {{ border-color: {BLUE}; color: {BLUE}; }}
-          .stTabs [data-baseweb="tab-list"] {{ gap: 8px; }}
-          .stTabs [data-baseweb="tab"] {{ color: {SUBTLE}; }}
-          .stTabs [aria-selected="true"] {{ color: {INK}; }}
+            background: {CARD_HI}; color: {INK}; font-weight: 600; padding: .5rem 1.1rem;
+            transition: border-color .2s ease, color .2s ease, box-shadow .2s ease; }}
+          .stDownloadButton button:hover, .stButton button:hover {{
+            border-color: {BLUE}; color: {BLUE}; box-shadow: 0 0 0 3px rgba(10,132,255,.15); }}
+
+          button:focus-visible, [role="tab"]:focus-visible, a:focus-visible {{
+            outline: 2px solid {BLUE}; outline-offset: 2px; }}
+
+          @media (prefers-reduced-motion: reduce) {{
+            * {{ transition: none !important; animation: none !important; }}
+          }}
         </style>
         """
 

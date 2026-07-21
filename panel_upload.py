@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import json
 
+import altair as alt
 import streamlit as st
 
 import analytics
@@ -75,7 +76,27 @@ def render() -> None:
         trend = by_month(df, company=None if company == ALL else company)
         st.dataframe(trend, hide_index=True, use_container_width=True)
         if len(trend) > 1:
-            st.line_chart(trend.set_index("Month")["% Within"], height=180)
+            tdf = trend[["Month", "% Within"]].rename(columns={"% Within": "pct"}).copy()
+            tdf["pct"] = tdf["pct"].astype(float)
+            lo = max(0.0, tdf["pct"].min() - 5)
+            # Single mark + explicit domain: an area layer alongside a scale
+            # domain collapses the plot in current Streamlit/vega-lite.
+            chart = alt.Chart(tdf).mark_line(
+                strokeWidth=2.5, interpolate="monotone", color=ui_theme.BLUE,
+                point=alt.OverlayMarkDef(size=48, filled=True, color=ui_theme.BLUE),
+            ).encode(
+                x=alt.X("Month:N", title=None,
+                        axis=alt.Axis(labelAngle=0, labelColor=ui_theme.SUBTLE,
+                                      domainColor=ui_theme.HAIRLINE, tickColor=ui_theme.HAIRLINE)),
+                y=alt.Y("pct:Q", title="% within SLA",
+                        scale=alt.Scale(domain=[lo, 100]),
+                        axis=alt.Axis(labelColor=ui_theme.SUBTLE, titleColor=ui_theme.SUBTLE,
+                                      gridColor=ui_theme.HAIRLINE, gridOpacity=0.5,
+                                      domainOpacity=0, tickOpacity=0)),
+                tooltip=[alt.Tooltip("Month:N"), alt.Tooltip("pct:Q", title="% within", format=".1f")],
+            )
+            st.altair_chart(chart.properties(height=200, background="transparent")
+                            .configure_view(strokeOpacity=0), use_container_width=True)
 
     detail = filter_frame(df, company, month)
     with st.expander(f"Ticket detail ({len(detail):,} rows)"):

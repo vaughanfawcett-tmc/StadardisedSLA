@@ -2,9 +2,17 @@
 maxUploadSize = 50
 headless = true
 
+[client]
+toolbarMode = "minimal"
+
 [theme]
 base = "dark"
 primaryColor = "#0A84FF"
 backgroundColor = "#0A0E13"
 secondaryBackgroundColor = "#141A22"
 textColor = "#E8EDF3"
+linkColor = "#0A84FF"
+borderColor = "#243142"
+baseRadius = "12px"
+codeBackgroundColor = "#141A22"
+showWidgetBorder = true
