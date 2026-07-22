@@ -2,7 +2,7 @@
 
 Scalable SLA reporting platform. Ingests SLA report exports from Fresh and turns
 them into structured, queryable KPI outputs. Built in phases; **Phase 1 (Core SLA
-Reporting / MVP)** is implemented.
+Reporting / MVP)** and **Phase 2 (report types + history)** are implemented.
 
 ## What Phase 1 does
 
@@ -11,6 +11,22 @@ Reporting / MVP)** is implemented.
 3. **Derive** per ticket: reporting month, company name, SLA status, SLA flag.
 4. **Filter** by company and month.
 5. **Report** the core KPIs: total tickets, within SLA, outside SLA, SLA %.
+
+## What Phase 2 adds
+
+- **Report types** — a *Report* dropdown on every view: Combined SLA (the
+  Phase 1 rule), First response, Resolution, or Every response. Per-metric
+  reports cover only tickets that actually carry that SLA target (status
+  populated) and judge them on that field alone.
+- **Persistent history** — every processed upload is snapshotted to a small
+  SQLite DB (`data/history.db`, override with `SLA_HISTORY_DB`). The
+  **History** tab shows the upload log, all-time KPIs and a cross-upload SLA
+  trend. Duplicate files are deduped by hash; a re-export covering the same
+  month supersedes the older snapshot. Only aggregates are stored (per
+  report x company x month counts) — never raw ticket rows.
+  Note: on Render's free tier the disk is ephemeral, so history survives
+  restarts but not redeploys; point `SLA_HISTORY_DB` at a mounted disk for
+  durability.
 
 The KPI output matches the brief's contract:
 

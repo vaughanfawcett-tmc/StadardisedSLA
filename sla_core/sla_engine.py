@@ -12,17 +12,36 @@ import pandas as pd
 from .config import sla_rules
 
 
+def _norm(df: pd.DataFrame, fields: list[str]) -> pd.DataFrame:
+    return df[fields].fillna("").astype(str).apply(lambda s: s.str.strip().str.lower())
+
+
+def within_mask(df: pd.DataFrame, fields: list[str] | None = None,
+                rules: dict | None = None) -> pd.Series:
+    """Boolean mask: True where the ticket is within SLA for the given status
+    fields (defaults to all configured fields — the combined rule)."""
+    rules = rules or sla_rules()
+    fields = [f for f in (fields if fields is not None else rules["status_fields"])
+              if f in df.columns]
+    if not fields:
+        return pd.Series(True, index=df.index)
+    violations = {v.strip().lower() for v in rules["violation_values"]}
+    return ~_norm(df, fields).isin(violations).any(axis=1)
+
+
+def applicable_mask(df: pd.DataFrame, fields: list[str]) -> pd.Series:
+    """Boolean mask: True where at least one of the status fields is populated,
+    i.e. the ticket actually carried that SLA target."""
+    fields = [f for f in fields if f in df.columns]
+    if not fields:
+        return pd.Series(False, index=df.index)
+    return (_norm(df, fields) != "").any(axis=1)
+
+
 def derive_sla(df: pd.DataFrame, rules: dict | None = None) -> pd.DataFrame:
     """Add ``sla_within_flag`` (Y/N) and ``sla_status`` columns to a standardised frame."""
     rules = rules or sla_rules()
-    fields = [f for f in rules["status_fields"] if f in df.columns]
-    violations = {v.strip().lower() for v in rules["violation_values"]}
-
-    if fields:
-        norm = df[fields].fillna("").astype(str).apply(lambda s: s.str.strip().str.lower())
-        breached = norm.isin(violations).any(axis=1)
-    else:
-        breached = pd.Series(False, index=df.index)
+    breached = ~within_mask(df, rules=rules)
 
     out = df.copy()
     out["sla_within_flag"] = (~breached).map({True: "Y", False: "N"})

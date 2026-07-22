@@ -11,10 +11,11 @@ import streamlit as st
 import analytics
 import ui_theme
 from sla_core import (
-    ALL, IngestError, by_company, by_month, kpi, list_companies,
-    list_months, load_standardised,
+    ALL, COMBINED, METRICS, IngestError, by_company, by_month, kpi,
+    list_companies, list_months, load_standardised,
 )
-from sla_core.aggregate import filter_frame
+from sla_core import history
+from sla_core.aggregate import filter_frame, metric_scope
 
 
 @st.cache_data(show_spinner="Processing export…")
@@ -42,20 +43,34 @@ def render() -> None:
     for w in warnings:
         st.warning(w)
 
-    # Track each distinct export processed (once per file, not on every rerun).
+    # Track each distinct export processed (once per file, not on every rerun),
+    # and record it in the persistent report history (deduped by file hash).
     if st.session_state.get("_tracked_file") != upload.name:
         st.session_state["_tracked_file"] = upload.name
         analytics.track("export_processed", rows=row_count)
+    try:
+        _, newly_saved = history.record_upload(upload.getvalue(), upload.name, df)
+    except Exception:  # noqa: BLE001 — history must never break reporting
+        newly_saved = False
 
-    col_c, col_m = st.columns(2)
+    col_r, col_c, col_m = st.columns(3)
+    with col_r:
+        metric = st.selectbox("Report", list(METRICS))
     with col_c:
         company = st.selectbox("Company", [ALL] + list_companies(df))
     with col_m:
         month = st.selectbox("Month", [ALL] + list_months(df))
 
-    st.caption(f"Loaded {row_count:,} tickets.")
+    caption = f"Loaded {row_count:,} tickets."
+    if newly_saved:
+        caption += " Saved to report history."
+    if metric != COMBINED:
+        in_scope = len(metric_scope(df, metric)[0])
+        caption += (f" {in_scope:,} carry a {metric.lower()} SLA target; "
+                    "the report covers those.")
+    st.caption(caption)
 
-    result = kpi(df, company, month)
+    result = kpi(df, company, month, metric)
     ui_theme.kpi_hero(result)
     st.write("")
 
@@ -67,13 +82,13 @@ def render() -> None:
         scope = month if month != ALL else "all months"
         st.markdown(f'<div class="section-label">SLA by company · {scope}</div>',
                     unsafe_allow_html=True)
-        st.dataframe(by_company(df, month=None if month == ALL else month),
+        st.dataframe(by_company(df, month=None if month == ALL else month, metric=metric),
                      hide_index=True, use_container_width=True)
     with right:
         label = "all companies" if company == ALL else company
         st.markdown(f'<div class="section-label">SLA by month · {label}</div>',
                     unsafe_allow_html=True)
-        trend = by_month(df, company=None if company == ALL else company)
+        trend = by_month(df, company=None if company == ALL else company, metric=metric)
         st.dataframe(trend, hide_index=True, use_container_width=True)
         if len(trend) > 1:
             tdf = trend[["Month", "% Within"]].rename(columns={"% Within": "pct"}).copy()

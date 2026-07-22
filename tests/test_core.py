@@ -54,8 +54,8 @@ def test_ingest_real_export():
     assert overall["outside_sla"] == 148
     assert overall["sla_percentage"] == round(100 * 6793 / 6941, 2)
 
-    # Brief's example contract shape.
-    assert set(overall) == {"company", "month", "total_tickets",
+    # Brief's example contract shape (+ Phase 2's additive "metric" key).
+    assert set(overall) == {"company", "month", "metric", "total_tickets",
                             "within_sla", "outside_sla", "sla_percentage"}
 
     # Filtering works.

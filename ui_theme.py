@@ -231,6 +231,8 @@ def kpi_hero_html(result: dict) -> str:
     pct = float(result["sla_percentage"])
     color = health_color(pct)
     ctx = f"{result['company']} · {result['month']}"
+    if result.get("metric"):
+        ctx += f" · {result['metric']}"
     return f"""
         <div class="card hero">
           <div>{_ring_svg(pct, color)}</div>
